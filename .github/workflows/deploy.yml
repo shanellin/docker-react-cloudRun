@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  PROJECT_ID: docker-react-cloudRun
+  PROJECT_ID: docker-react-cloudrun
   SERVICE_NAME: react-app
   RUN_REGION: asia-east2-a
   
