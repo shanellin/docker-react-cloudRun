@@ -11,7 +11,7 @@ on:
 env:
   PROJECT_ID: docker-react-cloudrun
   SERVICE_NAME: react-app
-  RUN_REGION: asia-east2-a
+  RUN_REGION: asia-east1
   
 jobs:
   build:
