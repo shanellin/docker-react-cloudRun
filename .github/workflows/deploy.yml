@@ -1,0 +1,53 @@
+name: Deploy (dev)
+
+on:
+  push:
+    branches: [ "develop" ]
+  pull_request:
+    branches: [ "develop" ]
+
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: docker-react-cloudRun
+  SERVICE_NAME: react-app
+  RUN_REGION: asia-east2-a
+  
+jobs:
+  build:
+    name: Deploy to CloudRun
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+          
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y%m%d%H%M%S')"
+
+      - name: Setup gcloud auth
+        uses: google-github-actions/setup-gcloud@v0.2.0
+        with:
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ env.PROJECT_ID }}
+
+      # Build and push image to Google Container Registry
+      - name: Build
+        run: |-
+          gcloud builds submit \
+            --quiet \
+            --tag "gcr.io/$PROJECT_ID/$SERVICE_NAME:${{ steps.date.outputs.date }}"
+
+      # Deploy image to Cloud Run
+      - name: Deploy
+        run: |-
+          gcloud run deploy "$SERVICE_NAME" \
+            --quiet \
+            --region "$RUN_REGION" \
+            --image "gcr.io/$PROJECT_ID/$SERVICE_NAME:${{ steps.date.outputs.date }}" \
+            --platform "managed" \
+            --port 80 \
+            --allow-unauthenticated
+
+      - name: Deployed!
+        run: echo App deployed to CloudRun
